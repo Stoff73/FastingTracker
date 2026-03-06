@@ -12,7 +12,9 @@ import SwiftData
 struct FastingTrackerApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            FastingSession.self,
+            UserProfile.self,
+            Friend.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -23,9 +25,13 @@ struct FastingTrackerApp: App {
         }
     }()
 
+    init() {
+        NotificationManager.shared.requestAuthorization()
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
         }
         .modelContainer(sharedModelContainer)
     }
