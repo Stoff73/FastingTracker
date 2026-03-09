@@ -1,5 +1,6 @@
 import Foundation
 import LocalAuthentication
+import Observation
 
 @Observable
 final class AuthenticationManager {
@@ -29,17 +30,40 @@ final class AuthenticationManager {
         do {
             let success = try await context.evaluatePolicy(
                 .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Unlock your fasting profile"
+                localizedReason: "Access your fasting profile"
             )
+            
             await MainActor.run {
-                isAuthenticated = success
-                authError = nil
+                if success {
+                    isAuthenticated = true
+                    authError = nil
+                } else {
+                    authError = "Authentication failed"
+                }
             }
+            
             return success
+        } catch let error as LAError {
+            await MainActor.run {
+                switch error.code {
+                case .userCancel:
+                    authError = "Authentication cancelled"
+                case .userFallback:
+                    authError = "Passcode requested"
+                case .biometryNotAvailable:
+                    authError = "Biometry not available"
+                case .biometryNotEnrolled:
+                    authError = "Biometry not set up"
+                case .biometryLockout:
+                    authError = "Too many failed attempts"
+                default:
+                    authError = "Authentication error: \(error.localizedDescription)"
+                }
+            }
+            return false
         } catch {
             await MainActor.run {
                 authError = error.localizedDescription
-                isAuthenticated = false
             }
             return false
         }
@@ -73,6 +97,7 @@ final class AuthenticationManager {
         let context = LAContext()
         _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
         switch context.biometryType {
+        case .none: return "Passcode"
         case .faceID: return "Face ID"
         case .touchID: return "Touch ID"
         case .opticID: return "Optic ID"

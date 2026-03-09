@@ -1,8 +1,9 @@
+// MAIN CircularProgressView - Keep This File
 import SwiftUI
 
 struct CircularProgressView: View {
     let progress: Double
-    let currentStage: FastingStage
+    let currentStage: CoreFastingStage
     let elapsedHours: Double
     let targetHours: Double
     let isActive: Bool
@@ -29,7 +30,7 @@ struct CircularProgressView: View {
 
             // Stage markers on the ring
             if isActive {
-                ForEach(FastingStage.stages) { stage in
+                ForEach(CoreFastingStage.stages) { stage in
                     if elapsedHours >= stage.hours {
                         stageMarker(stage: stage)
                     }
@@ -66,7 +67,7 @@ struct CircularProgressView: View {
     }
 
     @ViewBuilder
-    private func stageMarker(stage: FastingStage) -> some View {
+    private func stageMarker(stage: CoreFastingStage) -> some View {
         let safeTarget = targetHours > 0 ? targetHours : 1
         let angle = (stage.hours / safeTarget) * 360 - 90
         let radius = ringSize / 2

@@ -185,7 +185,7 @@ struct ProfileView: View {
             editProfileSheet
         }
         .sheet(isPresented: $showHistory) {
-            historySheet
+            FastingHistorySheet(fastingManager: fastingManager)
         }
     }
 
@@ -234,58 +234,6 @@ struct ProfileView: View {
                         saveProfile()
                         isEditing = false
                     }
-                }
-            }
-        }
-    }
-
-    // MARK: - History Sheet
-
-    private var historySheet: some View {
-        NavigationStack {
-            List {
-                let sessions = fastingManager.completedSessions(modelContext: modelContext)
-                if sessions.isEmpty {
-                    ContentUnavailableView(
-                        "No History Yet",
-                        systemImage: "clock",
-                        description: Text("Complete your first fast to see it here.")
-                    )
-                } else {
-                    ForEach(sessions) { session in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(session.mood)
-                                    .font(.title3)
-                                Text(session.startDate, format: .dateTime.month().day().year())
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                Spacer()
-                                Text(session.durationDescription)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.cyan)
-                            }
-
-                            HStack {
-                                Text("Goal: \(Int(session.targetHours))h")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                let pct = Int(session.progress * 100)
-                                Text("Achieved: \(pct)%")
-                                    .font(.caption)
-                                    .foregroundStyle(pct >= 80 ? .green : .orange)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-            }
-            .navigationTitle("Fasting History")
-            .inlineNavigationBar()
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { showHistory = false }
                 }
             }
         }

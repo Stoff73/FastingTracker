@@ -20,6 +20,10 @@ final class FastingSession {
         self.moodLog = [MoodEntry(emoji: mood, timestamp: startDate)]
         self.notes = ""
     }
+    
+    convenience init(targetHours: Double, mood: String) {
+        self.init(startDate: Date(), targetHours: targetHours, mood: mood)
+    }
 
     var elapsedTime: TimeInterval {
         let end = endDate ?? Date()
@@ -38,8 +42,8 @@ final class FastingSession {
         startDate.addingTimeInterval(targetHours * 3600)
     }
 
-    var currentStage: FastingStage {
-        FastingStage.currentStage(forElapsedHours: elapsedHours)
+    var currentStage: CoreFastingStage {
+        CoreFastingStage.currentStage(forElapsedHours: elapsedHours)
     }
 
     var formattedElapsedTime: String {
@@ -63,9 +67,4 @@ final class FastingSession {
         endDate = Date()
         isActive = false
     }
-}
-
-struct MoodEntry: Codable, Hashable {
-    let emoji: String
-    let timestamp: Date
 }

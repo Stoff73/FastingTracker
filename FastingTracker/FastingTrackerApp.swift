@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct FastingTrackerApp: App {
+    @State private var isOnboardingComplete = false
+    
     var sharedModelContainer: ModelContainer = {
         do {
             return try ModelContainer(for: FastingSession.self, UserProfile.self, Friend.self)
@@ -25,11 +27,33 @@ struct FastingTrackerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .onAppear {
-                    NotificationManager.shared.requestAuthorization()
+            Group {
+                if isOnboardingComplete {
+                    MainTabView()
+                } else {
+                    OnboardingView(isOnboardingComplete: $isOnboardingComplete)
                 }
+            }
+            .onAppear {
+                checkOnboardingStatus()
+                NotificationManager.shared.requestAuthorization()
+                NotificationManager.shared.setupNotificationCategories()
+            }
         }
         .modelContainer(sharedModelContainer)
+    }
+    
+    private func checkOnboardingStatus() {
+        // Check if user profile exists to determine if onboarding is complete
+        let context = sharedModelContainer.mainContext
+        let descriptor = FetchDescriptor<UserProfile>()
+        
+        do {
+            let profiles = try context.fetch(descriptor)
+            isOnboardingComplete = !profiles.isEmpty
+        } catch {
+            print("❌ Failed to check onboarding status: \(error)")
+            isOnboardingComplete = false
+        }
     }
 }

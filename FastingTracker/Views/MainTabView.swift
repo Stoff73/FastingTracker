@@ -22,7 +22,7 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
-            NotificationsView()
+            CoreNotificationsView()
                 .tabItem {
                     Image(systemName: "bell.fill")
                     Text("Notifications")

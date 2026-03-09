@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		6460F8372F5ACAB1005E0FF9 /* FastingTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FastingTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6460F8462F5ACAB4005E0FF9 /* FastingTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FastingTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6460F8502F5ACAB4005E0FF9 /* FastingTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FastingTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6460F8372F5ACAB1005E0FF9 /* FastingTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = FastingTracker.app; path = "/Users/rebeccaslater-jones/Documents/FastingTracker/build/Debug/FastingTracker.app"; sourceTree = "<absolute>"; };
+		6460F8462F5ACAB4005E0FF9 /* FastingTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = FastingTrackerTests.xctest; path = "/Users/rebeccaslater-jones/Documents/FastingTracker/build/Debug/FastingTracker.app/Contents/PlugIns/FastingTrackerTests.xctest"; sourceTree = "<absolute>"; };
+		6460F8502F5ACAB4005E0FF9 /* FastingTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = FastingTrackerUITests.xctest; path = "/Users/rebeccaslater-jones/Documents/FastingTracker/build/Debug/FastingTrackerUITests-Runner.app/Contents/PlugIns/FastingTrackerUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -78,18 +78,7 @@
 				6460F8392F5ACAB1005E0FF9 /* FastingTracker */,
 				6460F8492F5ACAB4005E0FF9 /* FastingTrackerTests */,
 				6460F8532F5ACAB4005E0FF9 /* FastingTrackerUITests */,
-				6460F8382F5ACAB1005E0FF9 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		6460F8382F5ACAB1005E0FF9 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				6460F8372F5ACAB1005E0FF9 /* FastingTracker.app */,
-				6460F8462F5ACAB4005E0FF9 /* FastingTrackerTests.xctest */,
-				6460F8502F5ACAB4005E0FF9 /* FastingTrackerUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -196,7 +185,7 @@
 			mainGroup = 6460F82E2F5ACAB1005E0FF9;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 6460F8382F5ACAB1005E0FF9 /* Products */;
+			productRefGroup = 6460F82E2F5ACAB1005E0FF9;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

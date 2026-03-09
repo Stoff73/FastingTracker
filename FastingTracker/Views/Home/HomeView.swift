@@ -32,10 +32,11 @@ struct HomeView: View {
     @State private var showEditStart = false
     @State private var showEditTarget = false
     @State private var editedDate = Date()
-    @State private var completedShareText: String?
+    @State private var showEndFastModal = false
+    @State private var showHistory = false
 
     private var inProgressShareText: String {
-        SocialShareManager.shareText(for: .inProgress(
+        CoreShareManager.shareText(for: .inProgress(
             elapsedHours: fastingManager.elapsedHours,
             stage: fastingManager.currentStage
         ))
@@ -47,9 +48,19 @@ struct HomeView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
-                    // Header with share button
+                    // Header
                     HStack {
+                        Button {
+                            showHistory = true
+                        } label: {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 18))
+                                .foregroundStyle(skyBlue)
+                        }
+                        .buttonStyle(.plain)
+
                         Spacer()
+
                         if fastingManager.isActive {
                             ShareLink(item: inProgressShareText) {
                                 Image(systemName: "square.and.arrow.up")
@@ -63,7 +74,7 @@ struct HomeView: View {
                     .padding(.bottom, 8)
 
                     // Circular Progress
-                    CircularProgressView(
+                    CoreProgressView(
                         progress: fastingManager.progress,
                         currentStage: fastingManager.currentStage,
                         elapsedHours: fastingManager.elapsedHours,
@@ -174,14 +185,10 @@ struct HomeView: View {
                     // Start / End Button
                     Button {
                         if fastingManager.isActive {
-                            completedShareText = SocialShareManager.shareText(for: .completed(
-                                elapsedHours: fastingManager.elapsedHours,
-                                targetHours: fastingManager.activeFast?.targetHours ?? targetHours
-                            ))
-                            fastingManager.endFast()
+                            fastingManager.stopFastForReview()
+                            showEndFastModal = true
                         } else {
                             fastingManager.startFast(targetHours: targetHours, mood: currentMood)
-                            completedShareText = SocialShareManager.shareText(for: .started(targetHours: targetHours))
                         }
                     } label: {
                         Text(fastingManager.isActive ? "End Fast" : "Start Fast")
@@ -196,16 +203,6 @@ struct HomeView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(.horizontal, 24)
-
-                    // Share after start/end — appears briefly
-                    if let text = completedShareText {
-                        ShareLink(item: text) {
-                            Text("Share to Social Media")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(skyBlue)
-                                .padding(.top, 12)
-                        }
-                    }
 
                     // Community section
                     VStack(spacing: 8) {
@@ -257,6 +254,18 @@ struct HomeView: View {
                 targetHours = fast.targetHours
                 currentMood = fast.mood
             }
+        }
+        .sheet(isPresented: $showEndFastModal) {
+            EndFastSummarySheet(fastingManager: fastingManager) { _ in
+                showEndFastModal = false
+            } onDiscard: {
+                showEndFastModal = false
+            } onResume: {
+                showEndFastModal = false
+            }
+        }
+        .sheet(isPresented: $showHistory) {
+            FastingHistorySheet(fastingManager: fastingManager)
         }
     }
 

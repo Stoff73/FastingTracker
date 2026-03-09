@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct LearnView: View {
-    @State private var selectedCategory: LearnArticle.Category? = nil
+    @State private var selectedCategory: CoreLearnArticle.Category? = nil
 
-    private var filteredArticles: [LearnArticle] {
+    private var filteredArticles: [CoreLearnArticle] {
         if let category = selectedCategory {
-            return LearnArticle.articles.filter { $0.category == category }
+            return CoreLearnArticle.articles.filter { $0.category == category }
         }
-        return LearnArticle.articles
+        return CoreLearnArticle.articles
     }
 
     var body: some View {
@@ -45,7 +45,7 @@ struct LearnView: View {
                 FilterChip(title: "All", isSelected: selectedCategory == nil) {
                     selectedCategory = nil
                 }
-                ForEach(LearnArticle.Category.allCases, id: \.self) { category in
+                ForEach(CoreLearnArticle.Category.allCases, id: \.self) { category in
                     FilterChip(title: category.rawValue, isSelected: selectedCategory == category) {
                         selectedCategory = category
                     }
@@ -119,7 +119,7 @@ struct FilterChip: View {
 // MARK: - Article Card
 
 struct ArticleCard: View {
-    let article: LearnArticle
+    let article: CoreLearnArticle
 
     var body: some View {
         HStack(spacing: 14) {
@@ -164,7 +164,7 @@ struct ArticleCard: View {
 // MARK: - Article Detail
 
 struct ArticleDetailView: View {
-    let article: LearnArticle
+    let article: CoreLearnArticle
 
     var body: some View {
         ScrollView {
@@ -186,19 +186,11 @@ struct ArticleDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 8)
 
-                // Content blocks
-                ForEach(article.content) { block in
-                    VStack(alignment: .leading, spacing: 8) {
-                        if let heading = block.heading {
-                            Text(heading)
-                                .font(.headline)
-                        }
-                        Text(block.body)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
-                            .lineSpacing(4)
-                    }
-                }
+                // Content
+                Text(article.content)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(4)
             }
             .padding()
         }

@@ -1,11 +1,13 @@
 import Foundation
 import SwiftData
 import SwiftUI
+import Observation
 
 @Observable
 final class FastingManager {
     var activeFast: FastingSession?
     var elapsedTime: TimeInterval = 0
+    var isFastPendingEnd: Bool = false
     var isActive: Bool { activeFast?.isActive ?? false }
 
     private var timer: Timer?
@@ -20,12 +22,12 @@ final class FastingManager {
         return min(elapsedHours / fast.targetHours, 1.0)
     }
 
-    var currentStage: FastingStage {
-        FastingStage.currentStage(forElapsedHours: elapsedHours)
+    var currentStage: CoreFastingStage {
+        CoreFastingStage.currentStage(forElapsedHours: elapsedHours)
     }
 
-    var nextStage: FastingStage? {
-        FastingStage.nextStage(forElapsedHours: elapsedHours)
+    var nextStage: CoreFastingStage? {
+        CoreFastingStage.nextStage(forElapsedHours: elapsedHours)
     }
 
     var formattedElapsedTime: String {
@@ -56,35 +58,105 @@ final class FastingManager {
     }
 
     func startFast(targetHours: Double, mood: String) {
-        guard let modelContext else { return }
+        guard let modelContext else {
+            print("❌ Cannot start fast: ModelContext not available")
+            return
+        }
+        
+        // Validate inputs
+        guard targetHours > 0 && targetHours <= 168 else { // Max 7 days
+            print("❌ Invalid target hours: \(targetHours)")
+            return
+        }
+        
+        guard !mood.isEmpty else {
+            print("❌ Mood cannot be empty")
+            return
+        }
+        
+        // Check if there's already an active fast
+        if let existingFast = activeFast, existingFast.isActive {
+            print("⚠️ There's already an active fast. End it first.")
+            return
+        }
 
-        let session = FastingSession(targetHours: targetHours, mood: mood)
-        modelContext.insert(session)
-        try? modelContext.save()
+        do {
+            let session = FastingSession(targetHours: targetHours, mood: mood)
+            modelContext.insert(session)
+            try modelContext.save()
+            
+            activeFast = session
+            elapsedTime = 0
+            startTimer()
 
-        activeFast = session
-        elapsedTime = 0
-        startTimer()
-
-        NotificationManager.shared.scheduleFastingNotifications(
-            startDate: session.startDate,
-            targetHours: targetHours
-        )
+            NotificationManager.shared.scheduleFastingNotifications(
+                startDate: session.startDate,
+                targetHours: targetHours
+            )
+            
+            print("✅ Fast started successfully: \(targetHours)h goal")
+        } catch {
+            print("❌ Failed to start fast: \(error.localizedDescription)")
+        }
     }
 
-    func endFast() {
+    // MARK: - End Fast Lifecycle
+
+    /// Stops the timer and flags the fast as pending review (save or discard).
+    /// The activeFast session remains in memory; nothing is saved yet.
+    func stopFastForReview() {
+        guard activeFast?.isActive == true else { return }
+        stopTimer()
+        isFastPendingEnd = true
+    }
+
+    /// User changed their mind — resume the fast from where they left off.
+    func resumeFast() {
+        guard isFastPendingEnd, activeFast != nil else { return }
+        isFastPendingEnd = false
+        updateElapsedTime()
+        startTimer()
+    }
+
+    /// Persist the completed fast and update profile stats.
+    func confirmSaveFast(notes: String = "") {
         guard let modelContext, let fast = activeFast else { return }
+        do {
+            fast.endDate = Date()
+            fast.isActive = false
+            if !notes.isEmpty { fast.notes = notes }
+            try modelContext.save()
 
-        fast.endFast()
+            elapsedTime = 0
+            isFastPendingEnd = false
+            let completedFast = fast
+            activeFast = nil
+
+            Task { await NotificationManager.shared.cancelFastingNotifications() }
+            updateProfileStats(modelContext: modelContext, completedFast: completedFast)
+            print("✅ Fast saved: \(completedFast.formattedElapsedTime)")
+        } catch {
+            print("❌ Failed to save fast: \(error.localizedDescription)")
+        }
+    }
+
+    /// Delete the fast without saving stats.
+    func discardFast() {
+        guard let modelContext, let fast = activeFast else { return }
+        modelContext.delete(fast)
         try? modelContext.save()
-
         stopTimer()
         elapsedTime = 0
+        isFastPendingEnd = false
         activeFast = nil
+        Task { await NotificationManager.shared.cancelFastingNotifications() }
+        print("🗑️ Fast discarded")
+    }
 
-        NotificationManager.shared.cancelFastingNotifications()
-
-        updateProfileStats(modelContext: modelContext, completedFast: fast)
+    /// Convenience — kept for backward compat with tests.
+    func endFast() {
+        stopFastForReview()
+        confirmSaveFast()
     }
 
     func updateMood(_ mood: String) {
