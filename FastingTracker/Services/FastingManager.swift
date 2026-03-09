@@ -59,24 +59,32 @@ final class FastingManager {
 
     func startFast(targetHours: Double, mood: String) {
         guard let modelContext else {
+            #if DEBUG
             print("❌ Cannot start fast: ModelContext not available")
+            #endif
             return
         }
-        
+
         // Validate inputs
         guard targetHours > 0 && targetHours <= 168 else { // Max 7 days
+            #if DEBUG
             print("❌ Invalid target hours: \(targetHours)")
+            #endif
             return
         }
-        
+
         guard !mood.isEmpty else {
+            #if DEBUG
             print("❌ Mood cannot be empty")
+            #endif
             return
         }
-        
+
         // Check if there's already an active fast
         if let existingFast = activeFast, existingFast.isActive {
+            #if DEBUG
             print("⚠️ There's already an active fast. End it first.")
+            #endif
             return
         }
 
@@ -84,7 +92,7 @@ final class FastingManager {
             let session = FastingSession(targetHours: targetHours, mood: mood)
             modelContext.insert(session)
             try modelContext.save()
-            
+
             activeFast = session
             elapsedTime = 0
             startTimer()
@@ -93,10 +101,14 @@ final class FastingManager {
                 startDate: session.startDate,
                 targetHours: targetHours
             )
-            
+
+            #if DEBUG
             print("✅ Fast started successfully: \(targetHours)h goal")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ Failed to start fast: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -134,9 +146,13 @@ final class FastingManager {
 
             Task { await NotificationManager.shared.cancelFastingNotifications() }
             updateProfileStats(modelContext: modelContext, completedFast: completedFast)
+            #if DEBUG
             print("✅ Fast saved: \(completedFast.formattedElapsedTime)")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ Failed to save fast: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -150,7 +166,9 @@ final class FastingManager {
         isFastPendingEnd = false
         activeFast = nil
         Task { await NotificationManager.shared.cancelFastingNotifications() }
+        #if DEBUG
         print("🗑️ Fast discarded")
+        #endif
     }
 
     /// Convenience — kept for backward compat with tests.

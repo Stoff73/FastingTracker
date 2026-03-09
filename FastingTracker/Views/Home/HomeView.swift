@@ -204,17 +204,7 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                     .padding(.horizontal, 24)
 
-                    // Community section
-                    VStack(spacing: 8) {
-                        Text("11,981")
-                            .font(.system(size: 14))
-                            .foregroundStyle(grayText)
-                        Text("Fasting Now")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundStyle(darkText)
-                    }
-                    .padding(.top, 32)
-                    .padding(.bottom, 40)
+                    Spacer().frame(height: 40)
                 }
             }
 

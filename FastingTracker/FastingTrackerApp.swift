@@ -16,7 +16,9 @@ struct FastingTrackerApp: App {
         do {
             return try ModelContainer(for: FastingSession.self, UserProfile.self, Friend.self)
         } catch {
+            #if DEBUG
             print("❌ ModelContainer error: \(error)")
+            #endif
             // Fall back to in-memory store so the app can still launch
             return try! ModelContainer(
                 for: FastingSession.self, UserProfile.self, Friend.self,
@@ -52,7 +54,9 @@ struct FastingTrackerApp: App {
             let profiles = try context.fetch(descriptor)
             isOnboardingComplete = !profiles.isEmpty
         } catch {
+            #if DEBUG
             print("❌ Failed to check onboarding status: \(error)")
+            #endif
             isOnboardingComplete = false
         }
     }

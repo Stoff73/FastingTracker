@@ -10,6 +10,7 @@ final class NotificationManager {
     
     func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            #if DEBUG
             DispatchQueue.main.async {
                 if let error = error {
                     print("❌ Notification authorization error: \(error.localizedDescription)")
@@ -19,6 +20,7 @@ final class NotificationManager {
                     print("⚠️ Notification authorization denied")
                 }
             }
+            #endif
         }
     }
     
@@ -33,7 +35,9 @@ final class NotificationManager {
         Task {
             let status = await checkAuthorizationStatus()
             guard status == .authorized else {
+                #if DEBUG
                 print("⚠️ Notifications not authorized, skipping scheduling")
+                #endif
                 return
             }
             
@@ -101,7 +105,9 @@ final class NotificationManager {
     
     func cancelFastingNotifications() async {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        #if DEBUG
         print("🔕 All fasting notifications cancelled")
+        #endif
     }
     
     private func scheduleNotification(
@@ -127,9 +133,13 @@ final class NotificationManager {
         
         do {
             try await UNUserNotificationCenter.current().add(request)
+            #if DEBUG
             print("📅 Scheduled notification: \(title) for \(date)")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ Failed to schedule notification: \(error.localizedDescription)")
+            #endif
         }
     }
     
@@ -159,15 +169,21 @@ final class NotificationManager {
         
         do {
             try await UNUserNotificationCenter.current().add(request)
+            #if DEBUG
             print("📅 Daily reminder scheduled for \(hour):\(String(format: "%02d", minute))")
+            #endif
         } catch {
+            #if DEBUG
             print("❌ Failed to schedule daily reminder: \(error.localizedDescription)")
+            #endif
         }
     }
     
     func cancelDailyReminder() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_reminder"])
+        #if DEBUG
         print("🔕 Daily reminder cancelled")
+        #endif
     }
     
     // MARK: - Notification Categories

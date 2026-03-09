@@ -311,7 +311,9 @@ struct OnboardingView: View {
             isOnboardingComplete = true
             
         } catch {
+            #if DEBUG
             print("❌ Failed to save profile during onboarding: \(error.localizedDescription)")
+            #endif
         }
     }
 }
