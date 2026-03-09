@@ -11,27 +11,24 @@ import SwiftData
 @main
 struct FastingTrackerApp: App {
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            FastingSession.self,
-            UserProfile.self,
-            Friend.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: FastingSession.self, UserProfile.self, Friend.self)
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            print("❌ ModelContainer error: \(error)")
+            // Fall back to in-memory store so the app can still launch
+            return try! ModelContainer(
+                for: FastingSession.self, UserProfile.self, Friend.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
         }
     }()
-
-    init() {
-        NotificationManager.shared.requestAuthorization()
-    }
 
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .onAppear {
+                    NotificationManager.shared.requestAuthorization()
+                }
         }
         .modelContainer(sharedModelContainer)
     }

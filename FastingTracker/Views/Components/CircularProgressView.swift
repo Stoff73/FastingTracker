@@ -67,7 +67,8 @@ struct CircularProgressView: View {
 
     @ViewBuilder
     private func stageMarker(stage: FastingStage) -> some View {
-        let angle = (stage.hours / targetHours) * 360 - 90
+        let safeTarget = targetHours > 0 ? targetHours : 1
+        let angle = (stage.hours / safeTarget) * 360 - 90
         let radius = ringSize / 2
 
         ZStack {

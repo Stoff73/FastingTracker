@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct MainTabView: View {
     @State private var selectedTab = 0
@@ -44,4 +45,9 @@ struct MainTabView: View {
         }
         .tint(.cyan)
     }
+}
+
+#Preview {
+    MainTabView()
+        .modelContainer(for: [FastingSession.self, UserProfile.self, Friend.self], inMemory: true)
 }

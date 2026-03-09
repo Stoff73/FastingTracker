@@ -137,7 +137,8 @@ struct HomeView: View {
                                 .font(.system(size: 48, weight: .light))
                                 .foregroundStyle(darkText)
                                 .monospacedDigit()
-                                .minimumScaleFactor(0.6)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                         }
                         .frame(maxWidth: .infinity)
 

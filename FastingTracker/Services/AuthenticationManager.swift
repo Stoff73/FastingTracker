@@ -7,15 +7,13 @@ final class AuthenticationManager {
     var isAuthenticationAvailable = false
     var authError: String?
 
-    private let context = LAContext()
-
     init() {
         checkAvailability()
     }
 
     func checkAvailability() {
         var error: NSError?
-        isAuthenticationAvailable = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
+        isAuthenticationAvailable = LAContext().canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
 
     func authenticate() async -> Bool {

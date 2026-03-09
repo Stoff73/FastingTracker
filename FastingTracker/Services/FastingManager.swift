@@ -1,7 +1,6 @@
 import Foundation
 import SwiftData
 import SwiftUI
-import Combine
 
 @Observable
 final class FastingManager {
@@ -38,6 +37,7 @@ final class FastingManager {
     }
 
     func configure(modelContext: ModelContext) {
+        guard self.modelContext == nil else { return }
         self.modelContext = modelContext
         loadActiveFast()
     }
