@@ -1,315 +1,381 @@
-# FastingTracker — App Store Publishing Guide
+# FastingTracker — App Store Deployment Guide
 
-This is a step-by-step guide to get FastingTracker published on the App Store via TestFlight (for testing) and then to production.
+Complete step-by-step guide to submit FastingTracker to the App Store.
 
 ---
 
 ## Prerequisites
 
 - **Apple Developer Program membership** ($99/year) — [developer.apple.com/programs](https://developer.apple.com/programs/)
-- **Xcode 15+** installed
+- **Xcode 16+** installed on a Mac
 - **Apple ID** signed into Xcode (Xcode → Settings → Accounts)
-- Your team ID is `99S3M8JLLF` — if this is already enrolled, you're good to go
+- Team: `CHRISTOPHER JOHN SLATER-JONES`
+- Bundle ID: `CSJ.FastingTracker`
+- Privacy policy publicly hosted (see Part 0 below)
+
+---
+
+## Part 0: Host the Privacy Policy
+
+Apple requires a live, accessible privacy policy URL before you can submit.
+
+### Option A — GitHub Pages (recommended, free)
+
+1. The `PrivacyPolicy.md` is already committed to the repo
+2. In your GitHub repo settings, go to **Pages** → Source → **Deploy from branch** → `main`
+3. Enable GitHub Pages — your privacy policy will be at:
+   `https://stoff73.github.io/FastingTracker/PrivacyPolicy`
+4. Or convert `PrivacyPolicy.md` to a simple HTML page and commit it as `docs/privacy.html`
+
+### Option B — Any web host
+
+Upload `PrivacyPolicy.md` (or convert to HTML) to any URL you control. Copy the URL — you'll need it in Part 3.
 
 ---
 
 ## Part 1: Configure the Project in Xcode
 
 ### 1.1 Open the Project
-```
+```bash
 open FastingTracker.xcodeproj
 ```
 
 ### 1.2 Set Signing & Capabilities
-1. Click **FastingTracker** in the project navigator (blue icon, top left)
-2. Select the **FastingTracker** target (under TARGETS, not PROJECT)
-3. Go to the **Signing & Capabilities** tab
+1. Click **FastingTracker** in the project navigator (blue icon)
+2. Select the **FastingTracker** target (under TARGETS)
+3. Go to **Signing & Capabilities** tab
 4. Tick **Automatically manage signing**
-5. Set **Team** to your Apple Developer team
-6. Verify **Bundle Identifier** is `CSJ.FastingTracker`
-   - If it shows an error saying the ID is taken, change it to something unique like `com.chrisslater.fastingtracker`
-   - If you change it, update it in both Debug and Release configurations
+5. Set **Team** to `CHRISTOPHER JOHN SLATER-JONES`
+6. Confirm **Bundle Identifier** is `CSJ.FastingTracker`
+   - If the ID is already taken by another developer, change it to something unique, e.g. `com.chrisslater.fastingtracker`, then register that new ID in Part 2.2
 
-### 1.3 Set the Version Number
-1. Still on the **General** tab of the FastingTracker target
-2. Set **Version** to `1.0.0`
-3. Set **Build** to `1`
-   - Increment the Build number each time you upload a new build to TestFlight
+### 1.3 Set the Version and Build Number
+1. Go to **General** tab of the FastingTracker target
+2. Set **Version** → `1.0.0`
+3. Set **Build** → `1`
+   - Increment **Build** (not Version) every time you upload a new binary to App Store Connect
 
 ### 1.4 Verify Deployment Target
-1. Under **General** → **Minimum Deployments**
-2. Should be set to **iOS 17.0** (already configured)
+- **General** → **Minimum Deployments** → **iOS 17.0** (already configured)
 
-### 1.5 Check the App Icon
-1. Open `Assets.xcassets` in the project navigator
-2. Click **AppIcon** — you should see the generated icon with the progress ring design
-3. If you want to replace it with a custom design, drop a 1024x1024 PNG into the iOS slot
+### 1.5 Verify Privacy Manifest is Included
+The file `FastingTracker/PrivacyInfo.xcprivacy` is already in the project and will be automatically bundled by Xcode's file system sync. No manual action needed — Xcode 16 picks it up automatically.
+
+To confirm: **Product** → **Archive**, then in the Organizer click the archive → **Distribute App** → at the privacy manifest review screen you should see the manifest listed.
+
+### 1.6 Check the App Icon
+1. Open `Assets.xcassets` → click **AppIcon**
+2. Replace with a custom 1024×1024 PNG if needed (drag it onto the iOS 1024pt slot)
+3. Apple rejects apps with default/placeholder icons
 
 ---
 
 ## Part 2: Create the App in App Store Connect
 
 ### 2.1 Log In
-1. Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
-2. Sign in with your Apple ID (the one enrolled in the Developer Program)
+Go to [appstoreconnect.apple.com](https://appstoreconnect.apple.com) and sign in.
 
-### 2.2 Register the Bundle ID (if not done)
-1. Go to [developer.apple.com/account/resources/identifiers](https://developer.apple.com/account/resources/identifiers/list)
-2. Click the **+** button
-3. Select **App IDs** → Continue
-4. Select **App** → Continue
-5. Enter:
-   - **Description**: FastingTracker
-   - **Bundle ID**: Explicit → `CSJ.FastingTracker` (or whatever you set in Xcode)
-6. Under **Capabilities**, enable:
-   - **Push Notifications** (for fasting reminders)
-   - **Face ID** (listed as "FaceID" — for profile lock)
-7. Click **Continue** → **Register**
+### 2.2 Register the Bundle ID (first time only)
+1. Go to [developer.apple.com → Certificates, IDs & Profiles → Identifiers](https://developer.apple.com/account/resources/identifiers/list)
+2. Click **+** → **App IDs** → **App** → Continue
+3. Fill in:
+   - **Description**: Fasting Tracker
+   - **Bundle ID**: Explicit → `CSJ.FastingTracker`
+4. Under **Capabilities**, enable:
+   - **Push Notifications**
+5. Click **Continue** → **Register**
+
+> Note: Face ID does not need a separate capability toggle here — it's enabled via the `NSFaceIDUsageDescription` key already set in the project's build settings.
 
 ### 2.3 Create the App Listing
-1. Back in App Store Connect, go to **My Apps**
-2. Click the **+** button → **New App**
-3. Fill in:
+1. App Store Connect → **My Apps** → **+** → **New App**
+2. Fill in:
    - **Platforms**: iOS
-   - **Name**: FastingTracker (or "Fasting Tracker" — must be unique on the App Store)
-   - **Primary Language**: English (UK) or English (US)
-   - **Bundle ID**: Select `CSJ.FastingTracker` from the dropdown
-   - **SKU**: `fastingtracker` (any unique string, internal use only)
+   - **Name**: `Fasting Tracker` (spaces allowed; must be unique on the App Store)
+   - **Primary Language**: English (U.K.) or English (U.S.)
+   - **Bundle ID**: `CSJ.FastingTracker`
+   - **SKU**: `fasting-tracker-v1` (internal only, never shown to users)
    - **User Access**: Full Access
-4. Click **Create**
+3. Click **Create**
 
 ---
 
 ## Part 3: Prepare App Store Metadata
 
-You'll need these before you can submit. Fill them in on the App Store Connect app page.
-
 ### 3.1 Screenshots (Required)
-You need screenshots for at least:
-- **6.7" display** (iPhone 15 Pro Max / 16 Pro Max) — 1290 x 2796 pixels
-- **6.5" display** (iPhone 11 Pro Max) — 1242 x 2688 pixels (optional but recommended)
-- **iPad Pro 12.9"** — 2048 x 2732 pixels (if supporting iPad)
 
-**How to take screenshots:**
-1. Run the app in the Simulator on the correct device
-2. Press **Cmd+S** in the Simulator to save a screenshot to your Desktop
-3. Take screenshots of: Home screen (idle), Home screen (fasting), Friends tab, Learn tab, Profile tab
-4. Upload 3-10 screenshots per device size in App Store Connect
+> **IMPORTANT**: You must use a simulator that exactly matches the required display size slots in App Store Connect. Using the wrong simulator (e.g. iPhone 17 Pro or iPhone 16e) produces the wrong resolution and App Store Connect will reject them.
+
+| App Store Slot | Simulator to Use | Resolution |
+|---------------|-----------------|------------|
+| **6.9"** — **Required** | **iPhone 16 Pro Max** | 1320 × 2868 px |
+| 6.7" — Recommended | iPhone 15 Plus or iPhone 14 Plus | 1290 × 2796 px |
+| 6.5" — Recommended | iPhone 11 Pro Max | 1242 × 2688 px |
+| iPad Pro 13" — If iPad supported | iPad Pro 13-inch (M4) | 2064 × 2752 px |
+
+Do NOT use iPhone 17 Pro (6.3") or iPhone 16e (4.7") for screenshots — neither matches a required slot.
+
+**How to capture:**
+1. In Xcode, change the run destination to **iPhone 16 Pro Max**
+   - If it's not listed: **Window** → **Devices and Simulators** → **Simulators** tab → **+** → search "iPhone 16 Pro Max" → add it
+2. Run the app (**Cmd+R**)
+3. Navigate to each screen you want to capture
+4. Press **Cmd+S** in the Simulator — screenshot saves to your **Desktop**
+5. Repeat for all screens, then upload to App Store Connect under the **6.9"** slot
+
+**Recommended screens to capture:**
+1. Home – idle (before starting a fast)
+2. Home – active fast with progress ring and stage label
+3. End Fast summary modal
+4. Fasting history sheet
+5. Learn tab
+6. Profile tab
 
 ### 3.2 App Information
-Fill in on the app page in App Store Connect:
 
 | Field | Value |
 |-------|-------|
+| **Name** | Fasting Tracker |
 | **Subtitle** | Intermittent Fasting Timer |
 | **Category** | Health & Fitness |
 | **Secondary Category** | Lifestyle |
 | **Content Rights** | Does not contain third-party content |
-| **Age Rating** | Click "Edit" and answer the questionnaire (all "None" — no objectionable content) |
+| **Age Rating** | 4+ (answer "None" to all questionnaire items) |
 
-### 3.3 App Privacy
-Go to **App Privacy** tab in App Store Connect:
-1. Click **Get Started**
-2. Select **Yes, we collect data** (the app stores fasting sessions locally)
-3. Data types collected:
-   - **Health & Fitness** → Fasting data (used for app functionality, not tracked)
-   - **Contact Info** → Phone number (for Friends feature, not tracked)
-4. For each type, specify:
-   - **Used for**: App Functionality
-   - **Linked to identity**: No
-   - **Tracking**: No
+### 3.3 Description & Keywords
 
-### 3.4 Description & Keywords
-Use these in the **Version Information** section:
-
-**Description:**
+**Description** (paste into the Version Information → Description field):
 ```
-Track your intermittent fasting journey with FastingTracker. Watch your progress in real-time with a beautiful circular timer that shows exactly which fasting stage you're in — from digestion through fat burning, ketosis, autophagy, and deep cleanse.
+Track your intermittent fasting journey with Fasting Tracker. A beautiful circular progress timer shows exactly which fasting stage you're in — from digestion through fat burning, ketosis, autophagy, and deep cleanse.
 
-Features:
-• Visual fasting timer with stage-by-stage progress tracking
-• Learn what's happening in your body at each fasting stage
-• Track your mood throughout your fast
-• Add friends and fast together — see each other's progress
-• Comprehensive learning centre with fasting science, tips, and safety info
-• Share your fasting milestones on social media
-• Face ID protection for your profile
-• Fasting history with streaks and personal records
+FEATURES
+
+• Real-time fasting timer with circular progress ring
+• Fasting stage tracking — see what your body is doing right now
+• Mood check-in throughout your fast
+• Save and review your fasting history with streaks and personal records
+• Share fasting milestones to social media
+• Add friends and fast together
+• Learning centre with fasting science, tips, and safety information
 • Milestone notifications to keep you motivated
-• All data stored locally on your device — your data stays yours
+• Face ID / Touch ID profile protection
+• All data stored locally on your device — nothing leaves your phone
 
-Whether you're doing 16:8, 20:4, or extended fasts, FastingTracker helps you understand what your body is going through and keeps you motivated every step of the way.
-```
-
-**Keywords** (100 character limit, comma-separated):
-```
-fasting,intermittent,timer,health,ketosis,autophagy,weight,diet,tracker,16:8
+Supports 16:8, 18:6, 20:4, OMAD, and any custom fasting goal.
 ```
 
-**Promotional Text** (can be updated without a new build):
+**Keywords** (max 100 characters, comma-separated):
 ```
-Track your fast. Understand your body. Fast with friends.
+fasting,intermittent,timer,ketosis,autophagy,16:8,health,diet,tracker,fast
 ```
 
-**Support URL**: Your website or a GitHub pages link
-**Marketing URL**: Optional
+**Promotional Text** (updatable without a new build):
+```
+Track your fast. Know your stage. Fast with friends.
+```
+
+**Support URL**: Your privacy policy / GitHub Pages URL (required)
+
+**Privacy Policy URL**: The hosted `PrivacyPolicy.md` URL from Part 0
+
+### 3.4 App Privacy Nutrition Labels
+
+In App Store Connect → Your App → **App Privacy** tab:
+
+1. Click **Get Started**
+2. **"Do you collect data from this app?"** → **Yes**
+3. Add these data types (matching `PrivacyInfo.xcprivacy`):
+
+| Data Type | Purpose | Linked to Identity | Used for Tracking |
+|-----------|---------|-------------------|-------------------|
+| **Health & Fitness** (fasting session durations, stages, targets) | App Functionality | No | No |
+| **Other User Content** (mood emoji selections, fast notes) | App Functionality | No | No |
+| **Name** (display name entered during onboarding) | App Functionality | No | No |
+
+4. For each type, select:
+   - **Used for**: App Functionality only
+   - **Is this data linked to the user's identity?** → No
+   - **Is this data used for tracking?** → No
+5. Click **Publish**
+
+> These labels must match the `PrivacyInfo.xcprivacy` manifest already bundled in the app. They do.
 
 ---
 
 ## Part 4: Archive & Upload
 
-### 4.1 Set Build Configuration
-1. In Xcode, set the **scheme** to **FastingTracker**
-2. Set the **destination** to **Any iOS Device (arm64)** — NOT a simulator
-   - Click the device dropdown at the top and select it
+### 4.1 Select the Right Destination
+1. In Xcode, confirm the scheme is **FastingTracker**
+2. Click the device dropdown → select **Any iOS Device (arm64)** — NOT a simulator
+3. "Archive" is greyed out when a simulator is selected
 
-### 4.2 Create an Archive
-1. Go to **Product** → **Archive** (menu bar)
-2. Wait for the build to complete (1-3 minutes)
-3. The **Organizer** window opens automatically when done
+### 4.2 Archive the App
+1. **Product** → **Archive**
+2. Build takes 1–3 minutes
+3. The **Organizer** window opens automatically on completion
 
-If "Archive" is greyed out, make sure the destination is set to "Any iOS Device", not a simulator.
+### 4.3 Validate (Recommended Before Uploading)
+1. Select the archive in the Organizer
+2. Click **Validate App**
+3. Follow the prompts (same as distribute, but doesn't upload)
+4. Fix any errors before uploading
 
-### 4.3 Upload to App Store Connect
-1. In the Organizer, select your new archive
-2. Click **Distribute App**
-3. Select **App Store Connect** → **Next**
-4. Select **Upload** → **Next**
-5. Leave all options checked:
+### 4.4 Upload to App Store Connect
+1. Select the archive → **Distribute App**
+2. Select **App Store Connect** → **Next**
+3. Select **Upload** → **Next**
+4. Leave these checked:
    - ✅ Upload your app's symbols
    - ✅ Manage Version and Build Number
+5. If asked about the privacy manifest, review and confirm
 6. Select your **Distribution Certificate** and **Provisioning Profile**
-   - If using automatic signing, Xcode handles this for you
+   - With automatic signing, Xcode handles this automatically
 7. Click **Upload**
-8. Wait for the upload to complete (2-5 minutes depending on connection)
+8. Wait 2–5 minutes for the upload to complete
 
-### 4.4 If Upload Fails
-Common issues:
-- **"No accounts with App Store Connect access"** → Check Xcode → Settings → Accounts
-- **"No suitable application records found"** → The bundle ID in Xcode doesn't match App Store Connect
-- **"Missing compliance"** → See step 5.2 below
-- **Provisioning profile errors** → Go to Xcode → Settings → Accounts → your team → Download Manual Profiles
+### 4.5 Common Upload Failures
+
+| Error | Fix |
+|-------|-----|
+| "No accounts with App Store Connect access" | Xcode → Settings → Accounts → re-sign in |
+| "No suitable application records found" | Bundle ID in Xcode doesn't match App Store Connect |
+| "Missing compliance" | Answer the encryption question in TestFlight (see 5.2) |
+| Provisioning profile errors | Xcode → Settings → Accounts → team → Download Manual Profiles |
+| "Invalid privacy manifest" | Ensure `PrivacyInfo.xcprivacy` is inside `FastingTracker/` (it is) |
 
 ---
 
 ## Part 5: TestFlight (Beta Testing)
 
 ### 5.1 Wait for Processing
-1. After upload, go to App Store Connect → Your App → **TestFlight** tab
-2. The build will show as **Processing** — this takes 5-30 minutes
-3. You'll get an email when it's ready
+1. App Store Connect → Your App → **TestFlight** tab
+2. Build shows as **Processing** — takes 5–30 minutes
+3. You receive an email when ready
 
 ### 5.2 Export Compliance
-When the build finishes processing:
-1. Click on the build number
-2. You'll see a yellow **"Missing Compliance"** warning
-3. Click **Manage** next to it
-4. Answer: **"Does your app use encryption?"** → **No**
-   - FastingTracker doesn't use any custom encryption
-   - (HTTPS doesn't count — Apple means custom encryption algorithms)
-5. Click **Save**
+When processing completes:
+1. Click the build → **Manage** next to "Missing Compliance"
+2. **"Does your app use encryption?"** → **No**
+   - Fasting Tracker does not use custom encryption algorithms
+   - Standard HTTPS handled by the OS does not count
+3. Save
 
-### 5.3 Internal Testing (Immediate, No Review)
-1. Go to **TestFlight** → **Internal Testing**
-2. Click **+** next to "Internal Testers" to create a group
-3. Name it (e.g., "Core Team")
-4. Add testers by Apple ID email (up to 100 people)
-5. Select the build to test
-6. Testers receive an email invite immediately
-7. They install **TestFlight** from the App Store, accept the invite, and download the app
+### 5.3 Internal Testing (no Apple review required)
+1. TestFlight → **Internal Testing** → **+** to create a group
+2. Add up to 100 testers by Apple ID
+3. Select the build
+4. Testers get an email invite and install via the **TestFlight** app
 
-### 5.4 External Testing (Up to 10,000 Testers)
-1. Go to **TestFlight** → **External Testing**
-2. Click **+** to create a group
-3. Add testers by email OR create a **public link** anyone can use
-4. Fill in:
-   - **What to Test**: Describe what testers should focus on
-   - **Contact Email**: Your email for feedback
-5. Click **Submit for Review**
-6. Apple reviews external TestFlight builds (usually approved within 24-48 hours)
-7. Once approved, testers get the invite
+### 5.4 External Testing (up to 10,000 testers)
+1. TestFlight → **External Testing** → **+** to create a group
+2. Add testers by email or create a public link
+3. Fill in **What to Test** and a contact email
+4. **Submit for Review** — Apple reviews in 24–48 hours
+5. Once approved, testers are notified
 
-### 5.5 Tell Testers What To Do
-Share this with your testers:
+### 5.5 Tester Instructions
 ```
-1. Install "TestFlight" from the App Store (it's free, made by Apple)
+1. Install "TestFlight" from the App Store (free, made by Apple)
 2. Open the invite email on your iPhone
-3. Tap "View in TestFlight"
-4. Tap "Accept" then "Install"
-5. The app appears on your home screen like any other app
+3. Tap "View in TestFlight" → "Accept" → "Install"
 ```
 
 ---
 
 ## Part 6: Submit to the App Store (Production)
 
-Only do this when you're happy with TestFlight testing.
+### 6.1 Checklist Before Submitting
 
-### 6.1 Prepare for Submission
-1. In App Store Connect → Your App → **App Store** tab
-2. Make sure all required fields are filled:
-   - ✅ Screenshots uploaded
-   - ✅ Description written
-   - ✅ Category set
-   - ✅ Age rating completed
-   - ✅ App privacy filled in
-   - ✅ Support URL provided
-3. Under **Build**, click **+** and select your uploaded build
+- ✅ Screenshots uploaded (6.9" required)
+- ✅ Description filled in
+- ✅ Keywords set
+- ✅ Category: Health & Fitness
+- ✅ Age rating: 4+
+- ✅ App Privacy nutrition labels completed
+- ✅ Support URL provided (required)
+- ✅ Privacy Policy URL provided (required)
+- ✅ A build is linked to the version
 
 ### 6.2 Submit
-1. Click **Add for Review** (top right)
-2. Answer the submission questions:
-   - **Sign-in required?** → No (the app doesn't require login)
-   - **Content rights** → Yes, I own the rights
-   - **Advertising Identifier (IDFA)** → No (we don't use it)
-3. Click **Submit to App Review**
+1. App Store Connect → Your App → **App Store** tab
+2. Under **Build**, click **+** → select your uploaded build
+3. Click **Add for Review** (top right)
+4. Answer the submission questions:
+   - **Sign-in required?** → Yes — provide a demo account OR select "None required" and explain it uses local onboarding
+     > Fasting Tracker uses an onboarding flow, not a server-side login. Select "None" and note that the app creates a local profile on first launch.
+   - **Content rights** → I own all rights to this content
+   - **Advertising Identifier (IDFA)** → No
+5. **Submit to App Review**
 
-### 6.3 App Review Timeline
-- **Typical review time**: 24-48 hours (can be as fast as a few hours)
-- You'll get an email when the review is complete
-- If **rejected**, they'll tell you why. Fix the issue, upload a new build, and resubmit
-- If **approved**, you can release immediately or schedule a release date
+### 6.3 Review Timeline
+- Typical: **24–48 hours** (often same day)
+- You'll receive an email for approval or rejection
+- If rejected: read the reason, fix it, upload a new build (increment build number), resubmit
 
-### 6.4 Common Rejection Reasons (and How to Avoid Them)
-| Reason | Solution |
-|--------|----------|
-| Crashes or bugs | Test thoroughly on TestFlight first |
-| Incomplete features | Make sure all tabs/buttons work |
-| Missing privacy policy | Add a Support URL with a privacy policy |
-| Placeholder content | Remove any "lorem ipsum" or test data |
-| Health claims | Don't claim the app treats or cures any condition |
+### 6.4 Common Rejection Reasons
+
+| Reason | Fix |
+|--------|-----|
+| Crashes on launch | Test on a real device, not just simulator |
+| Incomplete features | Ensure all tabs and buttons work correctly |
+| Missing privacy policy | Must be a live URL, not a GitHub file preview |
+| Health claims | Describe features, not medical benefits |
+| Placeholder data / test accounts | Remove any hardcoded test content |
+| Privacy labels mismatch | Labels must match `PrivacyInfo.xcprivacy` (they do) |
 
 ---
 
 ## Part 7: Post-Launch
 
-### 7.1 Updating the App
+### 7.1 Releasing an Update
 1. Make code changes
-2. Increment the **Build** number in Xcode (e.g., 1 → 2)
-3. Archive and upload again
-4. In App Store Connect, create a new version or update the existing one
-5. Submit for review
+2. **Increment Build number** (e.g., 1 → 2) — required for every upload
+3. Increment Version number for user-visible changes (e.g., 1.0.0 → 1.0.1)
+4. Archive → Upload → App Store Connect → create new version or add build → Submit
 
-### 7.2 Version Numbers
-- **Version** (e.g., 1.0.0): User-facing, shown on the App Store. Increment for feature releases.
-- **Build** (e.g., 1, 2, 3): Internal, must be unique per upload. Increment every time you upload.
+### 7.2 Version Numbering Convention
+- **Version** (CFBundleShortVersionString): User-visible. `MAJOR.MINOR.PATCH`
+  - `1.0.0` → initial release
+  - `1.0.1` → bug fixes
+  - `1.1.0` → new features
+- **Build** (CFBundleVersion): Must be unique per upload. Increment every time.
 
 ### 7.3 Monitoring
-- **App Store Connect → Analytics**: Downloads, sessions, crashes
-- **Xcode → Organizer → Crashes**: View crash reports from users
-- **TestFlight → Feedback**: Testers can send screenshots and notes from inside TestFlight
+- **App Store Connect → Analytics**: Downloads, sessions, retention
+- **Xcode → Organizer → Crashes**: Symbolicated crash reports from users
+- **TestFlight → Feedback**: Screenshots and notes from beta testers
 
 ---
 
-## Quick Reference: The Whole Process in 10 Steps
+## Part 8: Git — Push Pending Commits
 
-1. Sign into Xcode with your Apple Developer account
-2. Set signing & capabilities in the project
-3. Register Bundle ID at developer.apple.com
-4. Create the app in App Store Connect
-5. Fill in metadata (description, screenshots, privacy)
-6. In Xcode: set destination to "Any iOS Device" → Product → Archive
-7. In Organizer: Distribute App → App Store Connect → Upload
-8. In App Store Connect: TestFlight → add testers → test
-9. When ready: App Store tab → select build → Submit to App Review
-10. Wait for approval → Release
+There are 3 commits pending push to GitHub:
+
+```bash
+# From terminal (not this environment — requires GitHub credentials):
+git push
+
+# If HTTPS auth fails, switch to SSH:
+git remote set-url origin git@github.com:Stoff73/FastingTracker.git
+git push
+```
+
+Commits to push:
+- `c08c620` — Fix stability issues and add polish (original)
+- `ad5980c` — Add save/discard fast flow, fasting history, and sharing
+- `8e5dad5` — Add PrivacyInfo.xcprivacy privacy manifest and App Store preparation
+
+---
+
+## Quick Reference: Complete Deployment in 10 Steps
+
+1. Host `PrivacyPolicy.md` at a public URL (GitHub Pages is easiest)
+2. Open project in Xcode → set signing team → confirm bundle ID `CSJ.FastingTracker`
+3. Register bundle ID at developer.apple.com
+4. Create app listing in App Store Connect
+5. Fill in metadata: description, keywords, screenshots, support URL, privacy policy URL
+6. Complete App Privacy nutrition labels (Health & Fitness, User Content, Name — all local/unlinked)
+7. In Xcode: set destination → **Any iOS Device** → **Product** → **Archive**
+8. In Organizer: **Distribute App** → **App Store Connect** → **Upload**
+9. In App Store Connect → **TestFlight**: answer encryption question, add testers, test
+10. When ready: **App Store** tab → link build → **Submit to App Review** → wait for approval
