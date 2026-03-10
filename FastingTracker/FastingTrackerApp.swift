@@ -41,6 +41,7 @@ struct FastingTrackerApp: App {
                 NotificationManager.shared.requestAuthorization()
                 NotificationManager.shared.setupNotificationCategories()
             }
+            .preferredColorScheme(.light)
         }
         .modelContainer(sharedModelContainer)
     }
